@@ -127,8 +127,9 @@ Note: If my personal Career Agent is unable to provide a specific answer to your
 
 # Initialize the model and session outside the route to persist history
 model = genai.GenerativeModel('gemini-1.5-flash-latest')
-convo = model.start_chat(history=[])
-convo.send_message(pre_prompt)
+
+# This is the corrected line:
+convo = model.start_chat(history=[{'role': 'user', 'parts': [pre_prompt]}])
 
 
 @app.route('/')
@@ -146,7 +147,7 @@ def chat():
         response = convo.send_message(user_input)
         return jsonify({"response": response.text})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Sorry, I am unable to connect right now. Please try again later."}), 500
 
 
 if __name__ == '__main__':
