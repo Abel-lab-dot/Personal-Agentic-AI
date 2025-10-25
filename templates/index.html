@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gnonsoa Abel Constant TOH - AI Assistant</title>
+    
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WM2ZRLWR6X"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-WM2ZRLWR6X');
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -118,6 +127,17 @@
                 const message = userInput.value.trim();
                 if (message === '') return;
 
+                // Track the chat event *before* clearing the input
+                // 🌟 CUSTOM GA4 EVENT TRACKING (ai_chat_message) 🌟
+                if (typeof gtag === 'function') {
+                    gtag('event', 'ai_chat_message', {
+                        'event_category': 'Chatbot Interaction',
+                        'event_label': 'Message Sent',
+                        'user_query_length': message.length 
+                    });
+                }
+                // 🌟 END CUSTOM GA4 EVENT TRACKING 🌟
+
                 appendMessage(message, 'user');
                 userInput.value = '';
 
@@ -152,7 +172,8 @@
             function appendMessage(message, sender) {
                 const messageElement = document.createElement('div');
                 messageElement.classList.add('message', sender);
-                messageElement.innerHTML = message;
+                // Use innerHTML instead of textContent to allow for basic formatting later
+                messageElement.innerHTML = message; 
                 chatBox.appendChild(messageElement);
                 chatBox.scrollTop = chatBox.scrollHeight;
                 return messageElement;
