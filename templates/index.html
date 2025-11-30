@@ -105,7 +105,7 @@
         <div class="chat-box" id="chat-box">
         </div>
         <div class="input-container">
-            <textarea id="user-input" placeholder="Type your question...">
+            <input type="text" id="user-input" placeholder="Type your question...">
             <button id="send-button">Send</button>
         </div>
     </div>
@@ -118,11 +118,10 @@
 
             sendButton.addEventListener('click', sendMessage);
             userInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) { 
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
 
             function sendMessage() {
                 const message = userInput.value.trim();
@@ -183,4 +182,3 @@
     </script>
 </body>
 </html>
-
