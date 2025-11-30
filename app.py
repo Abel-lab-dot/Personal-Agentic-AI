@@ -13,8 +13,8 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 # This "pre-prompt" sets the model's behavior and contains your professional information.
 # This ensures the AI has all the knowledge it needs before the conversation begins.
 pre_prompt = """
-You are Gnonsoa Abel Constant TOH's professional AI Assistant, designed to answer detailed questions 
-about his career history, skills, and projects. Your persona is professional, confident, 
+You are Gnonsoa Abel Constant TOH's professional AI Assistant, designed to answer detailed questions 
+about his career history, skills, and projects. Your persona is professional, confident, 
 and highly competent.
 
 [TONE AND STYLE]
@@ -36,7 +36,6 @@ When describing a past project, always emphasize the quantifiable business impac
 ---
 Contact & Scheduling:
 - LinkedIn Profile: <a href="https://www.linkedin.com/in/abel-gnonsoa-41613b1b7/">LinkedIn Profile</a>
-- Phone Number: 06208519141
 - Google Calendar for scheduling a call: <a href="https://calendar.google.com/calendar/u/0?cid=dG9oY29uc3RhbnRAZ21haWwuY29t">Google Calendar</a>
 
 ---
@@ -72,7 +71,7 @@ Tata Consultancy Services Limited (Contracted to TotalEnergies) Mar 2019 - Feb 2
 
 **CERTIFICATIONS (UPDATED)**
 - Completed the **MIT (Massachusetts Institute of Technology) Professional Education’s Applied Generative AI for Digital Transformation** program, deepening AI expertise.
-- Completed **Google Skills Programs** for **Advanced Generative AI for Developers** and **Generative AI for Leaders**.
+- Currently Completing the **Google Skills Programs** for **Advanced Generative AI for Developers** and **Generative AI for Leaders**.
 - Microsoft Certified: Power BI Data Analyst Associate (PL-300)
 - Microsoft Certified: Power Platform Functional Consultant Associate (PL-200)
 - Microsoft Certified: Azure AI Fundamentals (AI-900)
@@ -85,7 +84,7 @@ Tata Consultancy Services Limited (Contracted to TotalEnergies) Mar 2019 - Feb 2
 - **Communication & Interpersonal:** Strong Communication Skills, Training and Support, Problem Solving, Innovation, Prompt Engineering, AI-Augmented Collaboration.
 - **Data & Analytics:** Data Extraction, Data Management, Data Analysis, Data Modeling, Data Visualization, Data Governance, Data Architecture (Snowflake, Star Schema), Data Warehousing, ETL Processes, AI-Powered Data Insights, Generative AI for Data Storytelling.
 - **Technical Proficiency:** Microsoft Power Platform, Microsoft Excel, Microsoft Visual Studio Code, Service Now, Azure DevOps, Jira, SQL, CMDB, Python, PowerShell, Bash, Apache Airflow, Apache Kafka, REST API, Open AI API, Gemini, RAG Pipelines.
-- **AI Agent Development:** Extensive hands-on experience building custom AI Agents using **Microsoft Copilot Studio** and direct integration with **OpenAI** APIs.
+- **AI Agent Development:** Extensive hands-on experience building custom AI Agents using **Microsoft Copilot Studio**, **Google AI Studio**, and the **OpenAI Platform**.
 - **Tools & Technologies:** IBM Cognos Analytics, Google Looker, SAS Viya, Google Sheet, Automated ETL, Tableau, SharePoint, ChatGPT, Gemini, Intelligent Virtual Agents (Agentic AI), AI Workflow Automation, Generative AI Platforms.
 - **Languages:** Fluent in English and French.
 
@@ -104,9 +103,9 @@ Tata Consultancy Services Limited (Contracted to TotalEnergies) Mar 2019 - Feb 2
 ---
 Q&A Knowledge Base:
 - What is your professional summary?: I am a Digital Transformation Consultant with hands-on experience in AI-driven automation, data analytics, and business intelligence. I am skilled in designing intelligent solutions that enhance operational efficiency, streamline workflows, and deliver measurable impact across enterprise environments.
-- **What are your AI skills and training?:** I have completed the **MIT Professional Education's Applied Generative AI for Digital Transformation** program. I have practical experience building AI Agents using **Microsoft Copilot Studio** and integrating with **OpenAI**. Additionally, I completed the **Google Skills Programs** for **Advanced Generative AI for Developers** and **Generative AI for Leaders**.
+- **What are your AI skills and training?:** I have completed the **MIT Professional Education's Applied Generative AI for Digital Transformation** program. I have practical experience building AI Agents using **Microsoft Copilot Studio**, **Google AI Studio**, and the **OpenAI Platform**. Additionally, I am currently completing the **Google Skills Programs** for **Advanced Generative AI for Developers** and **Generative AI for Leaders**.
 - What are your key strengths and skills?: I am proficient in Power BI, Power Automate, Power Apps, Dataverse, SQL, Python, and PowerShell. My skills include Prompt Engineering, AI-Powered Data Insights, and implementing Generative AI for Data Storytelling. I have strong analytical and communication skills with a focus on enhancing operational efficiency.
-- What certifications do you hold?: I hold the Microsoft Certified: Power BI Data Analyst Associate, Power Platform Functional Consultant Associate, and Azure AI Fundamentals certifications. I also hold IBM certifications in BI Foundations, Data Analyst, and Data Warehouse Engineering. I recently completed the MIT Applied Generative AI for Digital Transformation program and the Google Advanced and Leader Generative AI programs.
+- What certifications do you hold?: I hold the Microsoft Certified: Power BI Data Analyst Associate, Power Platform Functional Consultant Associate, and Azure AI Fundamentals certifications. I also hold IBM certifications in BI Foundations, Data Analyst, and Data Warehouse Engineering. I recently completed the MIT Applied Generative AI for Digital Transformation program and am currently completing the Google Advanced and Leader Generative AI programs.
 - What languages do you speak?: I am fluent in English and French.
 - Can you describe a project where you led a team?: I led a Digital Transformation Team of 5 members across different sites, each working on specific projects, resulting in a **20% increase in efficiency** due to the smooth implementation of our digital roadmap.
 - How have you used Power BI or Python in your work?: I have developed dynamic Power BI dashboards and implemented Python scripts for automation and data processing to create automated ETL systems, **reducing manual tasks by 80%**.
@@ -123,7 +122,7 @@ Note: If my personal Career Agent is unable to provide a specific answer to your
 
 # Initialize the model and session outside the route to persist history
 # The model is correctly set to gemini-2.5-flash
-model = genai.GenerativeModel('gemini-2.5-flash') 
+model = genai.GenerativeModel('gemini-2.5-flash') 
 
 # This is the corrected line:
 convo = model.start_chat(history=[{'role': 'user', 'parts': [pre_prompt]}])
@@ -131,45 +130,45 @@ convo = model.start_chat(history=[{'role': 'user', 'parts': [pre_prompt]}])
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html')
 
 # 🌟 NEW GENERATOR FUNCTION FOR STREAMING 🌟
 def gemini_stream_generator(user_input):
-    """
-    A generator that yields response chunks from the Gemini API.
-    """
-    try:
-        # Pass the user input to the established chat session
-        response_stream = convo.send_message(user_input, stream=True)
-        
-        # Iterate over the chunks as they arrive and yield them
-        for chunk in response_stream:
-            if chunk.text:
-                yield chunk.text
-    except Exception:
-        # Log the full exception traceback to your Render console/logs
-        app.logger.error("An error occurred during Gemini API stream call:")
-        app.logger.error(traceback.format_exc())
-        yield "An internal server error occurred. Please check the server logs."
+    """
+    A generator that yields response chunks from the Gemini API.
+    """
+    try:
+        # Pass the user input to the established chat session
+        response_stream = convo.send_message(user_input, stream=True)
+        
+        # Iterate over the chunks as they arrive and yield them
+        for chunk in response_stream:
+            if chunk.text:
+                yield chunk.text
+    except Exception:
+        # Log the full exception traceback to your Render console/logs
+        app.logger.error("An error occurred during Gemini API stream call:")
+        app.logger.error(traceback.format_exc())
+        yield "An internal server error occurred. Please check the server logs."
 
 
 # 🌟 UPDATED CHAT ROUTE TO USE STREAMING 🌟
 @app.route('/chat', methods=['POST'])
 def chat():
-    user_input = request.json.get("message")
-    if not user_input:
-        # Return a standard JSON error for initialization errors
-        return jsonify({"error": "No message provided"}), 400
+    user_input = request.json.get("message")
+    if not user_input:
+        # Return a standard JSON error for initialization errors
+        return jsonify({"error": "No message provided"}), 400
 
-    # The stream_with_context wrapper sends chunks to the client as they are generated.
-    # The content_type must be set to 'text/event-stream' for the browser to read the stream correctly.
-    return Response(
-        stream_with_context(gemini_stream_generator(user_input)),
-        content_type='text/event-stream'
-    )
+    # The stream_with_context wrapper sends chunks to the client as they are generated.
+    # The content_type must be set to 'text/event-stream' for the browser to read the stream correctly.
+    return Response(
+        stream_with_context(gemini_stream_generator(user_input)),
+        content_type='text/event-stream'
+    )
 
 
 if __name__ == '__main__':
-    # When deploying to Render, the HOST and PORT should be handled by the Gunicorn/Web Server, 
-    # but this is correct for local testing.
-    app.run(host='0.0.0.0', port=5000)
+    # When deploying to Render, the HOST and PORT should be handled by the Gunicorn/Web Server, 
+    # but this is correct for local testing.
+    app.run(host='0.0.0.0', port=5000)
