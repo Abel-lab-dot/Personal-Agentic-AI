@@ -1,8 +1,8 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response, stream_with_context # 🌟 ADDED Response, stream_with_context
 from flask_cors import CORS
 import google.generativeai as genai
 import os
-import traceback  # For logging detailed stack traces
+import traceback
 
 app = Flask(__name__)
 CORS(app) # This allows your front-end to connect to the back-end
@@ -133,27 +133,40 @@ convo = model.start_chat(history=[{'role': 'user', 'parts': [pre_prompt]}])
 def index():
     return render_template('index.html')
 
+# 🌟 NEW GENERATOR FUNCTION FOR STREAMING 🌟
+def gemini_stream_generator(user_input):
+    """
+    A generator that yields response chunks from the Gemini API.
+    """
+    try:
+        # Pass the user input to the established chat session
+        response_stream = convo.send_message(user_input, stream=True)
+        
+        # Iterate over the chunks as they arrive and yield them
+        for chunk in response_stream:
+            if chunk.text:
+                yield chunk.text
+    except Exception:
+        # Log the full exception traceback to your Render console/logs
+        app.logger.error("An error occurred during Gemini API stream call:")
+        app.logger.error(traceback.format_exc())
+        yield "An internal server error occurred. Please check the server logs."
 
+
+# 🌟 UPDATED CHAT ROUTE TO USE STREAMING 🌟
 @app.route('/chat', methods=['POST'])
 def chat():
     user_input = request.json.get("message")
     if not user_input:
+        # Return a standard JSON error for initialization errors
         return jsonify({"error": "No message provided"}), 400
 
-    try:
-        response = convo.send_message(user_input)
-        return jsonify({"response": response.text})
-    except Exception as e:
-        # --- MODIFIED LOGGING BLOCK ---
-        # Log the full exception traceback to your Render console/logs
-        app.logger.error("An error occurred during Gemini API call:")
-        app.logger.error(traceback.format_exc()) # Prints the full stack trace
-
-        # Return a generic 500 error message to the client
-        return jsonify({
-            "error": "A server error occurred while processing the chat request. The issue has been logged for review."
-        }), 500
-        # --- END MODIFIED BLOCK ---
+    # The stream_with_context wrapper sends chunks to the client as they are generated.
+    # The content_type must be set to 'text/event-stream' for the browser to read the stream correctly.
+    return Response(
+        stream_with_context(gemini_stream_generator(user_input)),
+        content_type='text/event-stream'
+    )
 
 
 if __name__ == '__main__':
