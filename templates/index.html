@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gnonsoa Abel Constant TOH - AI Assistant</title>
+    <title>Professional AI Assistant</title>
     
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-WM2ZRLWR6X"></script>
     <script>
@@ -100,7 +100,7 @@
     <div class="chat-container">
         <div class="header">
             <h3>Professional AI Assistant</h3>
-            <p>Hello! I am Gnonsoa Abel Constant TOH. Feel free to ask me anything about my professional experience and skills.</p>
+                        <p>Hello! I am Gnonsoa Abel Constant TOH. Feel free to ask me anything about my professional experience and skills.</p>
         </div>
         <div class="chat-box" id="chat-box">
         </div>
@@ -117,9 +117,8 @@
             const chatBox = document.getElementById('chat-box');
 
             sendButton.addEventListener('click', sendMessage);
-            
-            // --- UPDATED KEYPRESS LISTENER (Shift+Enter for new line) ---
-            userInput.addEventListener('keypress', function(e) {
+            
+                        userInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     // Send message only if SHIFT is NOT pressed
                     if (!e.shiftKey) { 
@@ -128,9 +127,7 @@
                     }
                 }
             });
-            // --- END UPDATED KEYPRESS LISTENER ---
-
-            function sendMessage() {
+                        function sendMessage() {
                 const message = userInput.value.trim();
                 if (message === '') return;
 
