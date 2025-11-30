@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, Response, stream_with_context # 🌟 ADDED Response, stream_with_context
+from flask import Flask, request, jsonify, render_template, Response, stream_with_context
 from flask_cors import CORS
 import google.generativeai as genai
 import os
@@ -13,8 +13,8 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 # This "pre-prompt" sets the model's behavior and contains your professional information.
 # This ensures the AI has all the knowledge it needs before the conversation begins.
 pre_prompt = """
-You are Gnonsoa Abel Constant TOH's professional AI Assistant, designed to answer detailed questions 
-about his career history, skills, and projects. Your persona is professional, confident, 
+You are Gnonsoa Abel Constant TOH's professional AI Assistant, designed to answer detailed questions
+about his career history, skills, and projects. Your persona is professional, confident,
 and highly competent.
 
 [TONE AND STYLE]
@@ -130,45 +130,45 @@ convo = model.start_chat(history=[{'role': 'user', 'parts': [pre_prompt]}])
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html')
 
 # 🌟 NEW GENERATOR FUNCTION FOR STREAMING 🌟
 def gemini_stream_generator(user_input):
-    """
-    A generator that yields response chunks from the Gemini API.
-    """
-    try:
-        # Pass the user input to the established chat session
-        response_stream = convo.send_message(user_input, stream=True)
-        
-        # Iterate over the chunks as they arrive and yield them
-        for chunk in response_stream:
-            if chunk.text:
-                yield chunk.text
-    except Exception:
-        # Log the full exception traceback to your Render console/logs
-        app.logger.error("An error occurred during Gemini API stream call:")
-        app.logger.error(traceback.format_exc())
-        yield "An internal server error occurred. Please check the server logs."
+    """
+    A generator that yields response chunks from the Gemini API.
+    """
+    try:
+        # Pass the user input to the established chat session
+        response_stream = convo.send_message(user_input, stream=True)
+        
+        # Iterate over the chunks as they arrive and yield them
+        for chunk in response_stream:
+            if chunk.text:
+                yield chunk.text
+    except Exception:
+        # Log the full exception traceback to your Render console/logs
+        app.logger.error("An error occurred during Gemini API stream call:")
+        app.logger.error(traceback.format_exc())
+        yield "An internal server error occurred. Please check the server logs."
 
 
 # 🌟 UPDATED CHAT ROUTE TO USE STREAMING 🌟
 @app.route('/chat', methods=['POST'])
 def chat():
-    user_input = request.json.get("message")
-    if not user_input:
-        # Return a standard JSON error for initialization errors
-        return jsonify({"error": "No message provided"}), 400
+    user_input = request.json.get("message")
+    if not user_input:
+        # Return a standard JSON error for initialization errors
+        return jsonify({"error": "No message provided"}), 400
 
-    # The stream_with_context wrapper sends chunks to the client as they are generated.
-    # The content_type must be set to 'text/event-stream' for the browser to read the stream correctly.
-    return Response(
-        stream_with_context(gemini_stream_generator(user_input)),
-        content_type='text/event-stream'
-    )
+    # The stream_with_context wrapper sends chunks to the client as they are generated.
+    # The content_type must be set to 'text/event-stream' for the browser to read the stream correctly.
+    return Response(
+        stream_with_context(gemini_stream_generator(user_input)),
+        content_type='text/event-stream'
+    )
 
 
 if __name__ == '__main__':
-    # When deploying to Render, the HOST and PORT should be handled by the Gunicorn/Web Server, 
-    # but this is correct for local testing.
-    app.run(host='0.0.0.0', port=5000)
+    # When deploying to Render, the HOST and PORT should be handled by the Gunicorn/Web Server,
+    # but this is correct for local testing.
+    app.run(host='0.0.0.0', port=5000)
