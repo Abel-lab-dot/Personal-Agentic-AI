@@ -105,7 +105,7 @@
         <div class="chat-box" id="chat-box">
         </div>
         <div class="input-container">
-                        <input type="text" id="user-input" placeholder="Type your question...">
+            <input type="text" id="user-input" placeholder="Type your question...">
             <button id="send-button">Send</button>
         </div>
     </div>
@@ -117,7 +117,7 @@
             const chatBox = document.getElementById('chat-box');
 
             sendButton.addEventListener('click', sendMessage);
-            // RESTORED: Original keypress listener for single-line input
+            // EXISTING: Original keypress listener preserved
             userInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     sendMessage();
@@ -145,7 +145,7 @@
                 // Show a loading message
                 const loadingMessage = appendMessage('...', 'bot');
 
-                // 🌟 START STREAMING FETCH LOGIC (Updated from original) 🌟
+                // 🌟 START STREAMING FETCH LOGIC (The intended update) 🌟
                 fetch('/chat', {
                     method: 'POST',
                     headers: {
@@ -177,7 +177,7 @@
                             const chunk = decoder.decode(value, { stream: true });
                             fullResponse += chunk;
                             
-                            // Set the innerHTML of the bot message element
+                            // Set the innerHTML of the bot message element, updating the text live
                             botMessageElement.innerHTML = fullResponse;
                             
                             // Scroll to the bottom of the chat box
