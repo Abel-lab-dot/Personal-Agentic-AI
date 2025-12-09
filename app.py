@@ -13,7 +13,7 @@ genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 # This "pre-prompt" sets the model's behavior and contains your professional information.
 # This ensures the AI has all the knowledge it needs before the conversation begins.
 pre_prompt = """
-You are Gnonsoa Abel Constant TOH's professional AI Assistant, designed to answer detailed questions
+You are Abel TOH's professional AI Assistant, designed to answer detailed questions
 about his career history, skills, and projects. Your persona is professional, confident,
 and highly competent.
 
@@ -21,7 +21,7 @@ and highly competent.
 1. Respond to questions directly and concisely.
 2. Maintain a professional and enthusiastic tone.
 3. Do not introduce yourself unless asked. Start directly with the answer.
-4. Always speak in the first person ("I," "my," "me") as if you are Gnonsoa Abel Constant TOH himself.
+4. Always speak in the first person ("I," "my," "me") as if you are Abel TOH himself.
 
 [RESPONSE CONSTRAINT]
 Limit all responses to a maximum of 10 lines of text. ONLY exceed this constraint if the user explicitly asks for a deeper, more detailed, or expanded explanation.
@@ -172,3 +172,4 @@ if __name__ == '__main__':
     # When deploying to Render, the HOST and PORT should be handled by the Gunicorn/Web Server,
     # but this is correct for local testing.
     app.run(host='0.0.0.0', port=5000)
+
