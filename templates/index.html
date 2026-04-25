@@ -42,7 +42,27 @@
             text-align: center;
         }
         .header h3 { margin: 0; font-size: 1.4rem; }
-        .header p { margin: 8px 0 0; font-size: 0.9rem; opacity: 0.9; }
+        .header p { margin: 8px 0 12px; font-size: 0.9rem; opacity: 0.9; }
+
+        /* Gold Schedule Button */
+        .schedule-btn {
+            display: inline-block;
+            background-color: #ffca28;
+            color: #004080;
+            text-decoration: none;
+            padding: 10px 22px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-top: 5px;
+        }
+        .schedule-btn:hover {
+            background-color: #ffd54f;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
 
         .chat-box {
             flex-grow: 1;
@@ -73,7 +93,6 @@
             border-bottom-left-radius: 4px;
         }
 
-        /* Quick Action Buttons */
         .quick-actions {
             padding: 10px 20px;
             display: flex;
@@ -81,7 +100,7 @@
             gap: 8px;
             background-color: #fff;
             border-top: 1px solid #eee;
-            transition: opacity 0.3s ease, visibility 0.3s;
+            transition: opacity 0.3s ease;
         }
         .action-chip {
             background-color: #fff;
@@ -112,9 +131,7 @@
             border-radius: 30px;
             font-size: 1rem;
             outline: none;
-            transition: border 0.3s;
         }
-        .input-container input:focus { border-color: #0056b3; }
         .input-container button {
             background-color: #0056b3;
             color: #fff;
@@ -124,9 +141,7 @@
             margin-left: 10px;
             cursor: pointer;
             font-weight: bold;
-            transition: transform 0.2s;
         }
-        .input-container button:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
@@ -134,11 +149,14 @@
         <div class="header">
             <h3>Abel Toh - Professional AI Assistant</h3>
             <p>Digital Transformation Consultant & IT PMO</p>
+            <a href="https://calendar.google.com/calendar/u/0?cid=dG9oY29uc3RhbnRAZ21haWwuY29t" target="_blank" class="schedule-btn">
+                📅 Schedule a Meeting
+            </a>
         </div>
         
         <div class="chat-box" id="chat-box">
             <div class="message bot">
-                Hello! I am Abel's Digital Twin. How can I help you explore my background or discuss a potential collaboration today?
+                Hello! I am Abel's Professional AI Assistant. How can I help you explore my background or discuss a potential collaboration today?
             </div>
         </div>
 
@@ -164,13 +182,10 @@
 
             sendButton.addEventListener('click', sendMessage);
             
-            // 🌟 IMPROVEMENT: Buttons fade away as soon as user starts typing
             userInput.addEventListener('input', () => {
                 if (userInput.value.length > 0) {
                     quickActions.style.opacity = '0';
-                    setTimeout(() => { 
-                        if(userInput.value.length > 0) quickActions.style.display = 'none'; 
-                    }, 300);
+                    setTimeout(() => { if(userInput.value.length > 0) quickActions.style.display = 'none'; }, 300);
                 } else {
                     quickActions.style.display = 'flex';
                     setTimeout(() => { quickActions.style.opacity = '1'; }, 10);
@@ -188,7 +203,6 @@
                 const message = userInput.value.trim();
                 if (message === '') return;
 
-                // GA4 Tracking
                 if (typeof gtag === 'function') {
                     gtag('event', 'ai_chat_message', { 'user_query_length': message.length });
                 }
@@ -210,7 +224,6 @@
                     const reader = response.body.getReader();
                     const decoder = new TextDecoder();
                     
-                    // 🌟 TYPEWRITER EFFECT LOGIC
                     let queue = "";
                     let isTyping = false;
 
@@ -218,12 +231,25 @@
                         if (isTyping || queue.length === 0) return;
                         isTyping = true;
                         while (queue.length > 0) {
-                            // Extract one character/chunk to simulate typing
-                            const char = queue.charAt(0);
-                            botMessageElement.innerHTML += char;
-                            queue = queue.substring(1);
+                            // 🌟 SMART HTML HANDLING: Detect tags and render them instantly
+                            if (queue.startsWith("<")) {
+                                const tagEnd = queue.indexOf(">") + 1;
+                                if (tagEnd > 0) {
+                                    const tag = queue.substring(0, tagEnd);
+                                    botMessageElement.innerHTML += tag;
+                                    queue = queue.substring(tagEnd);
+                                } else {
+                                    // Fallback if tag is incomplete in this chunk
+                                    botMessageElement.innerHTML += queue.charAt(0);
+                                    queue = queue.substring(1);
+                                }
+                            } else {
+                                const char = queue.charAt(0);
+                                botMessageElement.innerHTML += char;
+                                queue = queue.substring(1);
+                                await new Promise(r => setTimeout(r, 15));
+                            }
                             chatBox.scrollTop = chatBox.scrollHeight;
-                            await new Promise(r => setTimeout(r, 15)); // Adjust speed here (15ms)
                         }
                         isTyping = false;
                     }
@@ -235,8 +261,7 @@
                         processQueue(); 
                     }
                 } catch (error) {
-                    console.error('Error:', error);
-                    botMessageElement.innerHTML = 'Sorry, I encountered an error. Please try again.';
+                    botMessageElement.innerHTML = 'Sorry, I encountered an error.';
                 }
             }
 
