@@ -81,6 +81,7 @@
             gap: 8px;
             background-color: #fff;
             border-top: 1px solid #eee;
+            transition: opacity 0.3s ease, visibility 0.3s;
         }
         .action-chip {
             background-color: #fff;
@@ -162,12 +163,25 @@
             const quickActions = document.getElementById('quick-actions');
 
             sendButton.addEventListener('click', sendMessage);
+            
+            // 🌟 IMPROVEMENT: Buttons fade away as soon as user starts typing
+            userInput.addEventListener('input', () => {
+                if (userInput.value.length > 0) {
+                    quickActions.style.opacity = '0';
+                    setTimeout(() => { 
+                        if(userInput.value.length > 0) quickActions.style.display = 'none'; 
+                    }, 300);
+                } else {
+                    quickActions.style.display = 'flex';
+                    setTimeout(() => { quickActions.style.opacity = '1'; }, 10);
+                }
+            });
+
             userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
             window.handleAction = function(query) {
                 userInput.value = query;
                 sendMessage();
-                quickActions.style.display = 'none'; // Hide suggestions once the conversation starts
             };
 
             async function sendMessage() {
@@ -192,20 +206,33 @@
                         body: JSON.stringify({ message: message })
                     });
 
-                    botMessageElement.innerHTML = ''; // Clear loading dots
+                    botMessageElement.innerHTML = ''; 
                     const reader = response.body.getReader();
                     const decoder = new TextDecoder();
-                    let fullResponse = '';
+                    
+                    // 🌟 TYPEWRITER EFFECT LOGIC
+                    let queue = "";
+                    let isTyping = false;
+
+                    async function processQueue() {
+                        if (isTyping || queue.length === 0) return;
+                        isTyping = true;
+                        while (queue.length > 0) {
+                            // Extract one character/chunk to simulate typing
+                            const char = queue.charAt(0);
+                            botMessageElement.innerHTML += char;
+                            queue = queue.substring(1);
+                            chatBox.scrollTop = chatBox.scrollHeight;
+                            await new Promise(r => setTimeout(r, 15)); // Adjust speed here (15ms)
+                        }
+                        isTyping = false;
+                    }
 
                     while (true) {
                         const { done, value } = await reader.read();
                         if (done) break;
-                        const chunk = decoder.decode(value, { stream: true });
-                        fullResponse += chunk;
-                        
-                        // Simple check to ensure we don't break HTML tags during streaming
-                        botMessageElement.innerHTML = fullResponse;
-                        chatBox.scrollTop = chatBox.scrollHeight;
+                        queue += decoder.decode(value, { stream: true });
+                        processQueue(); 
                     }
                 } catch (error) {
                     console.error('Error:', error);
