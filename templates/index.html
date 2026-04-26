@@ -211,22 +211,34 @@
             
             function speakText(text) {
                 if (!synth) return;
-                // Clean the text: Remove HTML tags before speaking
                 const cleanText = text.replace(/<\/?[^>]+(>|$)/g, "");
                 if (cleanText.trim().length === 0) return;
 
                 const utterance = new SpeechSynthesisUtterance(cleanText);
-                const voices = synth.getVoices();
-                // Try to find a nice English voice
-                const selectedVoice = voices.find(voice => 
-                    (voice.name.includes('Google US English') || voice.name.includes('David') || voice.name.includes('Male')) 
-                    && voice.lang.startsWith('en')
-                );
+                let voices = synth.getVoices();
 
-                if (selectedVoice) utterance.voice = selectedVoice;
-                utterance.rate = 1.0;
+                // MULTILINGUAL MALE VOICE FILTER
+                // We try to find a male voice that matches the current language, 
+                // or fallback to a standard English male voice.
+                const maleKeywords = ['David', 'Guy', 'Male', 'Daniel', 'Pavel', 'Google US English', 'Microsoft Andrew'];
+                
+                const selectedVoice = voices.find(voice => {
+                    const nameMatches = maleKeywords.some(keyword => voice.name.includes(keyword));
+                    return nameMatches;
+                });
+
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+
+                utterance.rate = 0.95; // Slightly slower for professional tone
                 utterance.pitch = 1.0;
                 synth.speak(utterance);
+            }
+
+            // Chrome/Edge Fix: Ensure voices load
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = () => synth.getVoices();
             }
 
             // --- SPEECH RECOGNITION (LISTENING) LOGIC ---
@@ -237,7 +249,7 @@
                 recognition.lang = 'en-US';
 
                 micButton.addEventListener('click', () => {
-                    synth.cancel(); // Stop any current speaking
+                    synth.cancel(); 
                     recognition.start();
                 });
 
@@ -291,7 +303,6 @@
                 const message = userInput.value.trim();
                 if (message === '') return;
 
-                // Stop any current speaking when a new message is sent
                 synth.cancel();
 
                 if (typeof gtag === 'function') {
@@ -317,7 +328,7 @@
                     
                     let queue = "";
                     let isTyping = false;
-                    let sentenceBuffer = ""; // Buffer for natural speaking
+                    let sentenceBuffer = ""; 
 
                     async function processQueue() {
                         if (isTyping || queue.length === 0) return;
@@ -340,7 +351,6 @@
                                 sentenceBuffer += char;
                                 queue = queue.substring(1);
                                 
-                                // Speak when a sentence is finished
                                 if (['.', '!', '?', ':'].includes(char)) {
                                     speakText(sentenceBuffer);
                                     sentenceBuffer = "";
@@ -351,7 +361,6 @@
                             chatBox.scrollTop = chatBox.scrollHeight;
                         }
                         
-                        // Final sentence speak
                         if (sentenceBuffer.trim().length > 0) {
                             speakText(sentenceBuffer);
                             sentenceBuffer = "";
