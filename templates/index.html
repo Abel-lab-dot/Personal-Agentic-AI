@@ -133,7 +133,6 @@
             outline: none;
         }
         
-        /* Mic and Send Buttons */
         .icon-btn {
             background-color: #0056b3;
             color: #fff;
@@ -206,8 +205,31 @@
             const userInput = document.getElementById('user-input');
             const chatBox = document.getElementById('chat-box');
             const quickActions = document.getElementById('quick-actions');
+            
+            // --- SPEECH SYNTHESIS (VOICE OUT) LOGIC ---
+            const synth = window.speechSynthesis;
+            
+            function speakText(text) {
+                if (!synth) return;
+                // Clean the text: Remove HTML tags before speaking
+                const cleanText = text.replace(/<\/?[^>]+(>|$)/g, "");
+                if (cleanText.trim().length === 0) return;
 
-            // --- SPEECH RECOGNITION LOGIC ---
+                const utterance = new SpeechSynthesisUtterance(cleanText);
+                const voices = synth.getVoices();
+                // Try to find a nice English voice
+                const selectedVoice = voices.find(voice => 
+                    (voice.name.includes('Google US English') || voice.name.includes('David') || voice.name.includes('Male')) 
+                    && voice.lang.startsWith('en')
+                );
+
+                if (selectedVoice) utterance.voice = selectedVoice;
+                utterance.rate = 1.0;
+                utterance.pitch = 1.0;
+                synth.speak(utterance);
+            }
+
+            // --- SPEECH RECOGNITION (LISTENING) LOGIC ---
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (SpeechRecognition) {
                 const recognition = new SpeechRecognition();
@@ -215,6 +237,7 @@
                 recognition.lang = 'en-US';
 
                 micButton.addEventListener('click', () => {
+                    synth.cancel(); // Stop any current speaking
                     recognition.start();
                 });
 
@@ -241,7 +264,7 @@
                     userInput.placeholder = "Error occurred. Try again.";
                 };
             } else {
-                micButton.style.display = 'none'; // Hide if browser doesn't support
+                micButton.style.display = 'none';
             }
 
             // --- CHAT LOGIC ---
@@ -268,6 +291,9 @@
                 const message = userInput.value.trim();
                 if (message === '') return;
 
+                // Stop any current speaking when a new message is sent
+                synth.cancel();
+
                 if (typeof gtag === 'function') {
                     gtag('event', 'ai_chat_message', { 'user_query_length': message.length });
                 }
@@ -291,10 +317,12 @@
                     
                     let queue = "";
                     let isTyping = false;
+                    let sentenceBuffer = ""; // Buffer for natural speaking
 
                     async function processQueue() {
                         if (isTyping || queue.length === 0) return;
                         isTyping = true;
+                        
                         while (queue.length > 0) {
                             if (queue.startsWith("<")) {
                                 const tagEnd = queue.indexOf(">") + 1;
@@ -309,11 +337,26 @@
                             } else {
                                 const char = queue.charAt(0);
                                 botMessageElement.innerHTML += char;
+                                sentenceBuffer += char;
                                 queue = queue.substring(1);
+                                
+                                // Speak when a sentence is finished
+                                if (['.', '!', '?', ':'].includes(char)) {
+                                    speakText(sentenceBuffer);
+                                    sentenceBuffer = "";
+                                }
+
                                 await new Promise(r => setTimeout(r, 15));
                             }
                             chatBox.scrollTop = chatBox.scrollHeight;
                         }
+                        
+                        // Final sentence speak
+                        if (sentenceBuffer.trim().length > 0) {
+                            speakText(sentenceBuffer);
+                            sentenceBuffer = "";
+                        }
+                        
                         isTyping = false;
                     }
 
