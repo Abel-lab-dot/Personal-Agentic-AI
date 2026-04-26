@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app) # This allows your front-end to connect to the back-end
 
 # Set your API key from an environment variable for security
-genai.configure(api_api_key=os.environ["GEMINI_API_KEY"])
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 # This "pre-prompt" sets the model's behavior and contains your professional information.
 pre_prompt = """
