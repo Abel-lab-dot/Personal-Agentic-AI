@@ -206,12 +206,16 @@
             const chatBox = document.getElementById('chat-box');
             const quickActions = document.getElementById('quick-actions');
             
-            // --- ELEVENLABS PREMIUM VOICE CONFIG ---
             let currentAudio = null;
+            let shouldSpeak = false; // Logic: Talk only if Mic is used
 
+            // --- ELEVENLABS PREMIUM VOICE LOGIC ---
             async function speakText(text) {
+                // If user typed, don't execute voice
+                if (!shouldSpeak) return;
+
                 const XI_API_KEY = "sk_719371abb3b90aaa5cd8945ec76a7015b826dbf77c84a21c"; 
-                const VOICE_ID = "pNInz6obpgDQGcFmaJgB"; // 'Adam' Professional Male
+                const VOICE_ID = "pNInz6obpgDQGcFmaJgB"; // 'Adam'
 
                 const cleanText = text.replace(/<\/?[^>]+(>|$)/g, "").trim();
                 if (cleanText.length === 0) return;
@@ -239,9 +243,8 @@
                     currentAudio = new Audio(audioUrl);
                     currentAudio.play();
                 } catch (error) {
-                    console.error("ElevenLabs Failed, using browser fallback:", error);
-                    const utterance = new SpeechSynthesisUtterance(cleanText);
-                    window.speechSynthesis.speak(utterance);
+                    console.error("ElevenLabs Error:", error);
+                    // Fallback removed to prevent simultaneous lady voice
                 }
             }
 
@@ -253,8 +256,8 @@
                 recognition.lang = 'en-US';
 
                 micButton.addEventListener('click', () => {
+                    shouldSpeak = true; // MIC USED: Abel should talk back
                     if (currentAudio) currentAudio.pause();
-                    window.speechSynthesis.cancel();
                     recognition.start();
                 });
 
@@ -277,11 +280,21 @@
                 };
             }
 
-            // --- CHAT AND STREAMING LOGIC ---
-            sendButton.addEventListener('click', sendMessage);
-            userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+            // --- CHAT LOGIC ---
+            sendButton.addEventListener('click', () => {
+                shouldSpeak = false; // TYPED: Abel should be quiet
+                sendMessage();
+            });
+
+            userInput.addEventListener('keypress', (e) => { 
+                if (e.key === 'Enter') {
+                    shouldSpeak = false; // TYPED: Abel should be quiet
+                    sendMessage();
+                }
+            });
 
             window.handleAction = function(query) {
+                shouldSpeak = false; // CHIP CLICKED: Abel should be quiet
                 userInput.value = query;
                 sendMessage();
             };
@@ -291,7 +304,6 @@
                 if (message === '') return;
 
                 if (currentAudio) currentAudio.pause();
-                window.speechSynthesis.cancel();
 
                 appendMessage(message, 'user');
                 userInput.value = '';
@@ -322,8 +334,8 @@
                         botMessageElement.innerHTML = fullText;
                         sentenceBuffer += chunk;
 
-                        // Check for end of sentence to trigger voice early (improves speed)
-                        if (/[.!?\n]/.test(chunk)) {
+                        // Trigger voice early if mic was used
+                        if (/[.!?\n]/.test(chunk) && shouldSpeak) {
                             speakText(sentenceBuffer);
                             sentenceBuffer = "";
                         }
@@ -331,8 +343,7 @@
                         chatBox.scrollTop = chatBox.scrollHeight;
                     }
 
-                    // Speak any remaining text
-                    if (sentenceBuffer.trim()) speakText(sentenceBuffer);
+                    if (sentenceBuffer.trim() && shouldSpeak) speakText(sentenceBuffer);
 
                 } catch (error) {
                     botMessageElement.innerHTML = 'Sorry, I encountered an error.';
