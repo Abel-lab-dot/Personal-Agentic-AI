@@ -161,9 +161,9 @@
         </div>
 
         <div class="quick-actions" id="quick-actions">
+            <button class="action-chip" onclick="handleAction('Tell me about your role as an IT PMO')">💼 IT PMO Role</button>
+            <button class="action-chip" onclick="handleAction('Tell me about your Digital Transformation role')">🔄 Digital Transformation</button>
             <button class="action-chip" onclick="handleAction('What are your top 3 AI projects?')">🚀 AI Projects</button>
-            <button class="action-chip" onclick="handleAction('Tell me about your role at UniCredit')">🏦 UniCredit Role</button>
-            <button class="action-chip" onclick="handleAction('What did you learn at MIT?')">🎓 MIT AI Training</button>
             <button class="action-chip" onclick="handleAction('How do I contact Abel?')">📞 Contact Info</button>
         </div>
 
@@ -231,7 +231,6 @@
                         if (isTyping || queue.length === 0) return;
                         isTyping = true;
                         while (queue.length > 0) {
-                            // 🌟 SMART HTML HANDLING: Detect tags and render them instantly
                             if (queue.startsWith("<")) {
                                 const tagEnd = queue.indexOf(">") + 1;
                                 if (tagEnd > 0) {
@@ -239,7 +238,6 @@
                                     botMessageElement.innerHTML += tag;
                                     queue = queue.substring(tagEnd);
                                 } else {
-                                    // Fallback if tag is incomplete in this chunk
                                     botMessageElement.innerHTML += queue.charAt(0);
                                     queue = queue.substring(1);
                                 }
