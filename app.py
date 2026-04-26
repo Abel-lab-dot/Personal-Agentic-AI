@@ -10,7 +10,7 @@ CORS(app)
 # Set your API key from an environment variable for security
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-# This "pre-prompt" sets the model's behavior and contains your professional information.
+# Professional Pre-prompt
 pre_prompt = """
 You are Abel TOH's professional AI Assistant. Your goal is to provide concise, high-impact information about my career.
 
@@ -76,9 +76,14 @@ Q&A Knowledge Base (Use embedded HTML links):
 - What was your impact at TotalEnergies?: I delivered automation that saved 25+ hours weekly and reduced manual reporting tasks by 80%.
 """
 
-# Initialize the model and session
-model = genai.GenerativeModel('gemini-1.5-flash') # Note: Changed to 1.5-flash as 2.5 does not exist yet
-convo = model.start_chat(history=[{'role': 'user', 'parts': [pre_prompt]}])
+# 🌟 SAFETY INITIALIZATION
+try:
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    convo = model.start_chat(history=[{'role': 'user', 'parts': [pre_prompt]}])
+except Exception:
+    # Fallback to the most basic model identifier if flash fails
+    model = genai.GenerativeModel('gemini-pro')
+    convo = model.start_chat(history=[{'role': 'user', 'parts': [pre_prompt]}])
 
 @app.route('/')
 def index():
@@ -91,9 +96,8 @@ def gemini_stream_generator(user_input):
             if chunk.text:
                 yield chunk.text
     except Exception:
-        app.logger.error("An error occurred during Gemini API stream call:")
         app.logger.error(traceback.format_exc())
-        yield "An internal server error occurred."
+        yield "An error occurred while generating the response. Please try refreshing."
 
 @app.route('/chat', methods=['POST'])
 def chat():
