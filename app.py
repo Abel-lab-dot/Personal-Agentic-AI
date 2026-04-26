@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app) # This allows your front-end to connect to the back-end
 
 # Set your API key from an environment variable for security
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+genai.configure(api_api_key=os.environ["GEMINI_API_KEY"])
 
 # This "pre-prompt" sets the model's behavior and contains your professional information.
 pre_prompt = """
@@ -33,6 +33,7 @@ When describing a past project, always emphasize the quantifiable business impac
 
 ---
 Contact & Scheduling:
+- Phone Number: +36208519141
 - LinkedIn Profile: <a href="https://www.linkedin.com/in/abel-gnonsoa-41613b1b7/">LinkedIn Profile</a>
 - Google Calendar for scheduling a call: <a href="https://calendar.google.com/calendar/u/0?cid=dG9oY29uc3RhbnRAZ21haWwuY29t">Google Calendar</a>
 
@@ -85,10 +86,11 @@ Tata Consultancy Services Limited (Contracted to TotalEnergies) Mar 2019 - Feb 2
 
 ---
 Q&A Knowledge Base:
-- What is your current role?: I am currently an IT Project Management Officer at TCS, contracted to UniCredit, where I manage full project lifecycles and financial stewardship using OpenText PPM and SAP Ariba.
+- How do I contact Abel?: You can reach me directly via phone at [INSERT YOUR PHONE NUMBER HERE].
+- Tell me about your role as an IT PMO: Currently, I manage the full project lifecycle and financial stewardship for UniCredit via TCS, focusing on resource allocation and governance compliance using SAP Ariba and OpenText PPM.
+- Tell me about your Digital Transformation role: Over my career at TotalEnergies as both Manager and Associate, I led initiatives that saved 25+ hours weekly and reduced manual tasks by 80% through automated ETL systems and Power BI.
 - What are your AI skills?: I hold an MIT certification in Applied Generative AI and am a Microsoft Certified AI Transformation Leader. I specialize in building Agentic AI, RAG pipelines, and AI-driven automation.
 - How do you handle project governance?: I specialize in Hybrid Project Support, balancing Agile and Waterfall methodologies. I oversee portfolio demand planning, strategic resource allocation, and ensure 100% compliance with QA standards.
-- What is your impact on automation?: I have saved teams 25+ hours weekly through custom scripts and reduced manual tasks by 80% by deploying automated ETL systems.
 - Are you open to new opportunities?: Yes, I am open to relocation and remote work as a Digital Transformation Consultant or IT PMO.
 """
 
