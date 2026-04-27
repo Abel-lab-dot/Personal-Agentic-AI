@@ -78,6 +78,9 @@
             max-width: 85%;
             line-height: 1.6;
             font-size: 0.95rem;
+            /* PRESERVE NEW LINES */
+            white-space: pre-wrap; 
+            word-wrap: break-word;
         }
         .message.user {
             background-color: #0056b3;
@@ -119,18 +122,24 @@
 
         .input-container {
             display: flex;
-            padding: 20px;
+            padding: 15px 20px;
             border-top: 1px solid #eee;
             background-color: #fff;
-            align-items: center;
+            align-items: flex-end; /* Align icons to the bottom of the growing textarea */
         }
-        .input-container input {
+        
+        /* UPDATED TO TEXTAREA */
+        .input-container textarea {
             flex-grow: 1;
-            padding: 14px 20px;
+            padding: 12px 20px;
             border: 1px solid #dfe1e5;
-            border-radius: 30px;
+            border-radius: 20px;
             font-size: 1rem;
             outline: none;
+            resize: none;
+            max-height: 150px;
+            font-family: inherit;
+            line-height: 1.4;
         }
         
         .icon-btn {
@@ -148,6 +157,7 @@
             font-size: 1.2rem;
             transition: all 0.3s ease;
             flex-shrink: 0;
+            margin-bottom: 2px;
         }
         
         #mic-button.listening {
@@ -193,7 +203,7 @@
         </div>
 
         <div class="input-container">
-            <input type="text" id="user-input" placeholder="Type or speak your request...">
+            <textarea id="user-input" placeholder="Type or speak your request..." rows="1"></textarea>
             <button id="mic-button" class="icon-btn" title="Speak">🎤</button>
             <button id="send-button" class="icon-btn">Send</button>
         </div>
@@ -208,14 +218,27 @@
             const quickActions = document.getElementById('quick-actions');
             
             let currentAudio = null;
-            let voiceEnabled = false; // Flag to determine if we should call ElevenLabs
+            let voiceEnabled = false;
 
-            // --- ELEVENLABS LOGIC (Separate from Typing) ---
+            // --- AUTO-EXPAND TEXTAREA ---
+            userInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+
+                if (this.value.length > 0) {
+                    quickActions.style.opacity = '0';
+                    setTimeout(() => { if(this.value.length > 0) quickActions.style.display = 'none'; }, 300);
+                } else {
+                    quickActions.style.display = 'flex';
+                    setTimeout(() => { quickActions.style.opacity = '1'; }, 10);
+                }
+            });
+
+            // --- ELEVENLABS LOGIC ---
             async function playVoiceResponse(text) {
                 if (!voiceEnabled) return;
-
                 const XI_API_KEY = "sk_719371abb3b90aaa5cd8945ec76a7015b826dbf77c84a21c"; 
-                const VOICE_ID = "pNInz6obpgDQGcFmaJgB"; // Adam
+                const VOICE_ID = "pNInz6obpgDQGcFmaJgB"; 
 
                 const cleanText = text.replace(/<\/?[^>]+(>|$)/g, "").trim();
                 if (!cleanText) return;
@@ -247,7 +270,7 @@
                 recognition.lang = 'en-US';
 
                 micButton.addEventListener('click', () => {
-                    voiceEnabled = true; // Turn on voice for this interaction
+                    voiceEnabled = true; 
                     recognition.start();
                 });
 
@@ -261,18 +284,23 @@
 
             // --- UI HANDLERS ---
             sendButton.addEventListener('click', () => { voiceEnabled = false; sendMessage(); });
-            userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { voiceEnabled = false; sendMessage(); } });
-            window.handleAction = (query) => { voiceEnabled = false; userInput.value = query; sendMessage(); };
-
-            userInput.addEventListener('input', () => {
-                if (userInput.value.length > 0) {
-                    quickActions.style.opacity = '0';
-                    setTimeout(() => { if(userInput.value.length > 0) quickActions.style.display = 'none'; }, 300);
-                } else {
-                    quickActions.style.display = 'flex';
-                    setTimeout(() => { quickActions.style.opacity = '1'; }, 10);
+            
+            // SMART KEYBOARD HANDLING
+            userInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault(); // Prevents new line
+                    voiceEnabled = false;
+                    sendMessage();
                 }
+                // Shift + Enter stays as default behavior (new line)
             });
+
+            window.handleAction = (query) => { 
+                voiceEnabled = false; 
+                userInput.value = query; 
+                userInput.style.height = 'auto';
+                sendMessage(); 
+            };
 
             // --- CORE CHAT & STREAMING LOGIC ---
             async function sendMessage() {
@@ -281,7 +309,9 @@
 
                 if (currentAudio) currentAudio.pause();
                 appendMessage(message, 'user');
+                
                 userInput.value = '';
+                userInput.style.height = 'auto'; // Reset height after send
                 quickActions.style.display = 'none';
 
                 const botMessageElement = appendMessage('...', 'bot');
@@ -299,7 +329,7 @@
                     
                     let queue = "";
                     let isTyping = false;
-                    let fullTextForVoice = ""; // Accumulate for ElevenLabs
+                    let fullTextForVoice = "";
 
                     async function processQueue() {
                         if (isTyping || queue.length === 0) return;
@@ -329,11 +359,10 @@
                         if (done) break;
                         const chunk = decoder.decode(value, { stream: true });
                         queue += chunk;
-                        fullTextForVoice += chunk; // Save text for voice
+                        fullTextForVoice += chunk;
                         processQueue(); 
                     }
 
-                    // Only trigger voice once the response is complete to keep logic separate
                     if (voiceEnabled) playVoiceResponse(fullTextForVoice);
 
                 } catch (error) {
