@@ -34,6 +34,7 @@ When describing a past project, always emphasize the quantifiable business impac
 ---
 Contact & Scheduling:
 - Phone Number: +36208519141
+- Email Address: tohconstant@gmail.com
 
 ---
 Resume Data:
