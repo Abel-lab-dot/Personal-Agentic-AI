@@ -198,7 +198,8 @@
         <div class="quick-actions" id="quick-actions">
             <button class="action-chip" onclick="handleAction('Tell me about your role as an IT PMO')">💼 IT PMO Role</button>
             <button class="action-chip" onclick="handleAction('Tell me about your Digital Transformation role')">🔄 Digital Transformation</button>
-            <button class="action-chip" onclick="handleAction('What are your top 3 AI projects?')">🚀 AI Projects</button>
+            <!-- UPDATED BUTTON BELOW -->
+            <button class="action-chip" onclick="handleAction('Explain the technical architecture of this Digital Twin project, specifically the use of RAG, Vector Databases, and streaming voice.')">🚀 This AI Project</button>
             <button class="action-chip" onclick="handleAction('How do I contact Abel?')">📞 Contact Info</button>
         </div>
 
@@ -324,13 +325,11 @@
                         const chunk = decoder.decode(value, { stream: true });
                         accumulatedText += chunk;
 
-                        // This loop creates the "Natural Typing" effect while streaming
                         while (displayedText.length < accumulatedText.length) {
                             displayedText += accumulatedText.charAt(displayedText.length);
-                            // Render with Marked.js so formatting appears as it types
                             botMessageElement.innerHTML = marked.parse(displayedText);
                             chatBox.scrollTop = chatBox.scrollHeight;
-                            await new Promise(r => setTimeout(r, 20)); // Adjust speed here (20ms)
+                            await new Promise(r => setTimeout(r, 20)); 
                         }
                     }
 
