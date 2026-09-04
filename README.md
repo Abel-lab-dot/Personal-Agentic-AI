@@ -8,6 +8,12 @@ Built with **Python, Flask, Google Gemini, Render, and Google Analytics**.
 
 ---
 
+## 🖥️ Application Preview
+
+![Professional AI Assistant Demo](assets/demo.png)
+
+---
+
 ## 🚀 Live Demo
 
 The application is deployed publicly on **Render** and can be tested directly from the browser.
